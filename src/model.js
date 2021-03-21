@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler'
+import vertex from './shader/vertexShader.glsl'
+import fragment from './shader/fragmentShader.glsl'
 
 class Model {
   constructor (obj) {
@@ -10,6 +12,11 @@ class Model {
     this.file = obj.file
     this.scene = obj.scene
     this.placeOnLoad = obj.placeOnLoad
+
+    this.isActive = false
+
+    this.color1 = obj.color1
+    this.color2 = obj.color2
 
     this.loader = new GLTFLoader()
     this.dracoLoader = new DRACOLoader()
@@ -27,7 +34,7 @@ class Model {
       ----------------------------------------*/
       this.mesh = response.scene.children[0]
       /*----------------------------------------
-        Matirial Mesh
+        Material Mesh
       ----------------------------------------*/
       this.material = new THREE.MeshBasicMaterial({
         color: 'red',
@@ -45,10 +52,24 @@ class Model {
         Particles Materials
       ----------------------------------------*/
 
-      this.particleMatirial = new THREE.PointsMaterial({
-        color: 'red',
-        size: 0.02 
-      }) 
+      // this.particleMatirial = new THREE.PointsMaterial({
+      //   color: 'red',
+      //   size: 0.02 
+      // }) 
+
+      this.particleMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          uColor1: { value: new THREE.Color(this.color1) },
+          uColor2: { value: new THREE.Color(this.color2) },
+          utime: { value: 0 }
+        },
+        vertexShader: vertex, 
+        fragmentShader: fragment,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+        blending: THREE.Additiveblending
+      })
 
       /*----------------------------------------
         Particles Geometry
@@ -70,13 +91,12 @@ class Model {
       }
 
       this.particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlesPosition, 3))
-      console.log(this.particlesGeometry)
 
       /*----------------------------------------
         Particles
       ----------------------------------------*/
 
-      this.particles = new THREE.Points(this.particlesGeometry, this.particleMatirial)
+      this.particles = new THREE.Points(this.particlesGeometry, this.particleMaterial)
 
       /*----------------------------------------
         Palce on load
@@ -89,10 +109,12 @@ class Model {
 
   add() {
     this.scene.add(this.particles)
+    this.isActive = true
   }
 
   remove() {
     this.scene.remove(this.particles)
+    this.isActive = false
   }
 }
 export default Model

@@ -42,7 +42,6 @@ OrbitControls
 ------------------------------*/
 const controls = new OrbitControls( camera, renderer.domElement );
 
-
 /*------------------------------
 Helpers
 ------------------------------*/
@@ -52,17 +51,21 @@ Helpers
 // scene.add( axesHelper );
 
 /*------------------------------
-Model
+Models
 ------------------------------*/
 const skull = new Model({
   name: 'skull',
   file: './models/skull.glb',
   scene: scene,
+  color1: '#ed462f',
+  color2: '#f2f23e',
   placeOnLoad: true
 })
 
 const horse = new Model({
   name: 'horse',
+  color1: '#0037ff',
+  color2: '#f243e6',
   file: './models/horse.glb',
   scene: scene
 })
@@ -81,6 +84,11 @@ bottons[1].addEventListener('click', () => {
   horse.add()
 })
 
+/*------------------------------
+Clock
+--------------------------------*/
+
+const clock = new THREE.Clock()
 
 /*------------------------------
 Loop
@@ -88,6 +96,13 @@ Loop
 const animate = function () {
   requestAnimationFrame( animate );
   renderer.render( scene, camera );
+
+  if (skull.isActive) {
+    skull.particlesMaterial.uniforms.uTime.value = clock.getElapsedTime()
+  }
+  if (horse.isActive) {
+    horse.particlesMaterial.uniforms.uTime.value = clock.getElapsedTime()
+  }
 };
 animate();
 
